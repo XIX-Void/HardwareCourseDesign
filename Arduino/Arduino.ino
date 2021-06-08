@@ -23,11 +23,13 @@ using namespace std;
 #define XNUM 1
 #define YNUM 1
 
-//U8X8_SSD1306_128X64_NONAME_SW_I2C u8x8(/* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE);
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE);
 
 MPU6050 mpu;
-float x,y,z;
+
+float y,z;
+int temp_y = 0;
+int temp_z = 0;
 
 //made for ball's coordinate
 struct coordinate
@@ -130,8 +132,6 @@ volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin h
 void dmpDataReady() {
     mpuInterrupt = true;
 }
-int temp_y = 0;
-int temp_z = 0;
 
 Stack myStack = Stack();
 
@@ -178,7 +178,8 @@ void setup() {
 
 //iiiiiiiiiiiiiiiiiiiiiiiiiiiiii
     initialize();
-    srand((unsigned)time(NULL));
+    srand(analogRead(8) * analogRead(9) + analogRead(10));
+    //srand((unsigned)time(NULL));
     FindBlock();
     
     while(myStack.size()){
@@ -315,7 +316,6 @@ void loop() {
 
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
             // display Euler angles in degrees
-            x = ypr[0] * 180/M_PI;
             y = ypr[1] * 180/M_PI;
             z = ypr[2] * 180/M_PI;
 
@@ -334,17 +334,27 @@ void loop() {
 
         u8g2.clearBuffer();                   // clear the internal memory
         u8g2.setFont(u8g2_font_ncenB08_tr);   // choose a suitable font
-        if(-2 < y && y < 2){
+
+
+
+
+        //ball moving
+        if(-1 < y && y < 1){
             temp_y = temp_y;
         }else{
             temp_y = temp_y + y;
         }
-        if(-2 < z && z < 2){
+        if(-1 < z && z < 1){
             temp_z = temp_z;
         }else{
             temp_z = temp_z - z;
         }
         u8g2.drawDisc(60 + temp_y,30 + temp_z,2,U8G2_DRAW_ALL);
+
+
+
+
+        //maze drawing
         for(int i = 0; i< rows * 4; i++){
             for(int j = 0; j< cols * 4; j++){
                 if(maze[i / 4][j / 4] == walls){
@@ -354,7 +364,4 @@ void loop() {
         }
         u8g2.sendBuffer();                    // transfer internal memory to the display
     }
-    //Serial.println(F("complete loop"));
-    //delay(1000);
-    
 }
