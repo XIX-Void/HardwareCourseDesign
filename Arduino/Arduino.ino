@@ -96,6 +96,7 @@ void Stack::erase(int number){
 #define OUTPUT_READABLE_YAWPITCHROLL
 
 
+
 #define INTERRUPT_PIN 6  // use pin 2 on Arduino Uno & most boards
 #define LED_PIN 4 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 bool blinkState = false;
