@@ -24,6 +24,7 @@ using namespace std;
 #define YNUM 1
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE);
+//U8G2_SSD1309_128X64_NONAME2_2_4W_SW_SPI u8g2(U8G2_R0,SCL,SDA,10,9);
 
 MPU6050 mpu;
 
@@ -212,7 +213,7 @@ void setup() {
     
 
     Serial.begin(115200);
-    while (!Serial); // wait for Leonardo enumeration, others continue immediately
+    //while (!Serial); // wait for Leonardo enumeration, others continue immediately
 
     // initialize device
     Serial.println(F("Initializing I2C devices..."));
@@ -277,7 +278,7 @@ void setup() {
 
 
 
-    u8g2.setBusClock(400000);
+    u8g2.setBusClock(800000);
     u8g2.begin();
     //u8g2.setFlipMode(1);
 
