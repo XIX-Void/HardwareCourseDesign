@@ -277,7 +277,7 @@ void setup() {
 
 
 
-    u8g2.setBusClock(100000);
+    u8g2.setBusClock(400000);
     u8g2.begin();
     //u8g2.setFlipMode(1);
 
