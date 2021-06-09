@@ -27,15 +27,12 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* clock=*/ SCL, /* data=*/ SD
 
 MPU6050 mpu;
 
-float y,z;
-int temp_y = 0;
-int temp_z = 0;
-
 //made for ball's coordinate
 struct coordinate
 {
-    float x,y;
-};
+    float y = 6.0;
+    float z = 6.0;
+}ball,axis;
 
 struct block{
 	int row,column,direction;
@@ -51,10 +48,6 @@ struct block{
 	}
 };
 
-struct point {
-	int x;
-	int y;
-}start;
 
 class Stack {
 private:
@@ -135,7 +128,9 @@ void dmpDataReady() {
 
 Stack myStack = Stack();
 
+
 int maze[rows][cols];
+int game_time;
 int x_num=XNUM,y_num=YNUM;
 
 void initialize(){
@@ -176,9 +171,8 @@ void setup() {
         Fastwire::setup(400, true);
     #endif
 
-//iiiiiiiiiiiiiiiiiiiiiiiiiiiiii
     initialize();
-    srand(analogRead(8) * analogRead(9) + analogRead(10));
+    srand(analogRead(9) * analogRead(10));
     //srand((unsigned)time(NULL));
     FindBlock();
     
@@ -215,12 +209,6 @@ void setup() {
         myStack.erase(myStack.begin() + randnum);
     }
     
-//iiiiiiiiiiiiiiiiiiiiiiii
-
-
-
-
-
 
     Serial.begin(115200);
     while (!Serial); // wait for Leonardo enumeration, others continue immediately
@@ -293,15 +281,6 @@ void setup() {
     //u8g2.setFlipMode(1);
 
 
-
-
-    coordinate ball1;
-    ball1.x = 0;
-    ball1.y = 0;
-
-
-
-
 }
 
 
@@ -313,11 +292,11 @@ void loop() {
     if (!dmpReady) return;
     // read a packet from FIFO
     if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) { // Get the Latest packet 
-
+        
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
             // display Euler angles in degrees
-            y = ypr[1] * 180/M_PI;
-            z = ypr[2] * 180/M_PI;
+            axis.y = ypr[1] * 180/M_PI;
+            axis.z = ypr[2] * 180/M_PI;
 
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
@@ -329,39 +308,78 @@ void loop() {
         #endif
 
         // blink LED to indicate activity
-        blinkState = !blinkState;
-        digitalWrite(LED_PIN, blinkState);
+        //blinkState = !blinkState;
+        //digitalWrite(LED_PIN, blinkState);
 
         u8g2.clearBuffer();                   // clear the internal memory
-        u8g2.setFont(u8g2_font_ncenB08_tr);   // choose a suitable font
+        //u8g2.setFont(u8g2_font_ncenB08_tr);   // choose a suitable font
 
 
-
-
-        //ball moving
-        if(-1 < y && y < 1){
-            temp_y = temp_y;
+        if(ball.y >= 4 * (rows - 2) && ball.z >= 4 * (cols - 2)){
+            u8g2.clearBuffer();
+            u8g2.setFont(u8g2_font_ncenB14_tr);
+            u8g2.drawStr(0,28,"Game clear!");
+            u8g2.setCursor(0,52);
+            u8g2.print(game_time);
+            u8g2.drawStr(0,52,"      Second!");
+            u8g2.sendBuffer();
         }else{
-            temp_y = temp_y + y;
-        }
-        if(-1 < z && z < 1){
-            temp_z = temp_z;
-        }else{
-            temp_z = temp_z - z;
-        }
-        u8g2.drawDisc(60 + temp_y,30 + temp_z,2,U8G2_DRAW_ALL);
-
-
-
-
-        //maze drawing
-        for(int i = 0; i< rows * 4; i++){
-            for(int j = 0; j< cols * 4; j++){
-                if(maze[i / 4][j / 4] == walls){
-                    u8g2.drawPixel(i,j);
+            //ball moving
+            if(axis.y < -0.8){ //go left
+                if(maze[(int)ball.y/4 - 1][(int)ball.z/4] == walls){
+                    Serial.println("judgement 1 --- ");
+                }else{
+                    ball.y = ball.y + axis.y / 4;
+                }
+            }else if(axis.y > 0.8){ //go right
+                if(maze[(int)ball.y/4 + 1][(int)ball.z/4] == walls){
+                    Serial.println("judgement 2 --- ");
+                }else{
+                    ball.y = ball.y + axis.y / 4;
                 }
             }
+            if(axis.z < -0.8){ //go down
+                if(maze[(int)ball.y/4][(int)ball.z/4 + 1] == walls){
+                    Serial.println("judgement 3 --- ");
+                }else{
+                    ball.z = ball.z - axis.z / 4;
+                }
+            }else if(axis.z > 0.8){ //go up
+                if(maze[(int)ball.y/4][(int)ball.z/4 - 1] == walls){
+                    Serial.println("judgement 4 --- ");
+                }else{
+                    ball.z = ball.z - axis.z / 4;
+                }
+            }
+
+            /*
+            Serial.print(ball.y);
+            Serial.print("   ");
+            Serial.print((int)ball.y/4);
+            Serial.print("   ");
+            Serial.print("   ");
+            Serial.print(ball.z);
+            Serial.print("   ");
+            Serial.println((int)ball.z/4);
+            */
+
+            u8g2.drawBox(ball.y,ball.z, 3 ,3);
+
+
+
+
+            //maze drawing
+            for(int i = 0; i< rows * 4; i++){
+                for(int j = 0; j< cols * 4; j++){
+                    if(maze[i / 4][j / 4] == walls){
+                        u8g2.drawPixel(i,j);
+                    }
+                }
+            }
+            u8g2.drawCircle(4 * XNUM + 2 , 4 * YNUM + 2 ,2,U8G2_DRAW_ALL);//start point
+            u8g2.drawCircle(4 * (rows - 2) + 2 , 4 * (cols - 2) + 2, 2 , U8G2_DRAW_ALL);//end point
+            u8g2.sendBuffer();                    // transfer internal memory to the display
+            game_time = millis() / 1000;
         }
-        u8g2.sendBuffer();                    // transfer internal memory to the display
     }
 }
