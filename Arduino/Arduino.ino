@@ -372,30 +372,34 @@ void loop() {
                 u8g2.sendBuffer();
                 delay(3000);
             }
-        }else{
+        }else if(!button_x1 || !button_x2){
+            //x reset maze
+            if(x >  60){button_x1 = true;}
+            if(x < -60){button_x2 = true;}
+
             //ball moving
             if(axis.y < -0.8){ //go left
                 if(maze[(int)ball.y/4 - 1][(int)ball.z/4] == walls){
-                    Serial.println("judgement 1 --- ");
+                    //Serial.println("judgement 1 --- ");
                 }else{
                     ball.y = ball.y + axis.y / 4;
                 }
             }else if(axis.y > 0.8){ //go right
                 if(maze[(int)ball.y/4 + 1][(int)ball.z/4] == walls){
-                    Serial.println("judgement 2 --- ");
+                    //Serial.println("judgement 2 --- ");
                 }else{
                     ball.y = ball.y + axis.y / 4;
                 }
             }
             if(axis.z < -0.8){ //go down
                 if(maze[(int)ball.y/4][(int)ball.z/4 + 1] == walls){
-                    Serial.println("judgement 3 --- ");
+                    //Serial.println("judgement 3 --- ");
                 }else{
                     ball.z = ball.z - axis.z / 4;
                 }
             }else if(axis.z > 0.8){ //go up
                 if(maze[(int)ball.y/4][(int)ball.z/4 - 1] == walls){
-                    Serial.println("judgement 4 --- ");
+                    //Serial.println("judgement 4 --- ");
                 }else{
                     ball.z = ball.z - axis.z / 4;
                 }
@@ -429,6 +433,17 @@ void loop() {
             u8g2.drawCircle(4 * (rows - 2) + 2 , 4 * (cols - 2) + 2, 2 , U8G2_DRAW_ALL);//end point
             u8g2.sendBuffer();                    // transfer internal memory to the display
             game_time = millis() / 1000;
+        }else{
+            Serial.println(F("ok x"));
+            ball.y = ball.z = 6.0;
+            button_x1 = false;
+            button_x2 = false;
+            u8g2.clearBuffer();
+            u8g2.setFont(u8g2_font_ncenB14_tr);
+            u8g2.drawStr(10,32,"Generating!");
+            u8g2.sendBuffer();
+            universe_reset = true;
+            delay(1000);
         }
     }
 }
