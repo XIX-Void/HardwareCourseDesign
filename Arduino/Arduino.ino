@@ -331,26 +331,42 @@ void loop() {
                 if(maze[(int)ball.y/4 - 1][(int)ball.z/4] == walls){
                     Serial.println("judgement 1 --- ");
                 }else{
-                    ball.y = ball.y + axis.y / 4;
+                    if(-20 <= axis.y){
+                        ball.y = ball.y + axis.y / 4;
+                    }else{
+                        ball.y = ball.y + -20 / 4;
+                    }
                 }
             }else if(axis.y > 0.8){ //go right
                 if(maze[(int)ball.y/4 + 1][(int)ball.z/4] == walls){
                     Serial.println("judgement 2 --- ");
                 }else{
-                    ball.y = ball.y + axis.y / 4;
+                    if(20 >= axis.y){
+                        ball.y = ball.y + axis.y / 4;
+                    }else{
+                        ball.y = ball.y + 20 / 4;
+                    }
                 }
             }
             if(axis.z < -0.8){ //go down
                 if(maze[(int)ball.y/4][(int)ball.z/4 + 1] == walls){
                     Serial.println("judgement 3 --- ");
                 }else{
-                    ball.z = ball.z - axis.z / 4;
+                    if(-20 <= axis.z){
+                        ball.z = ball.z - axis.z / 4;
+                    }else{
+                        ball.z = ball.z - -20 / 4;
+                    }
                 }
             }else if(axis.z > 0.8){ //go up
                 if(maze[(int)ball.y/4][(int)ball.z/4 - 1] == walls){
                     Serial.println("judgement 4 --- ");
                 }else{
-                    ball.z = ball.z - axis.z / 4;
+                    if(20 >= axis.z){
+                        ball.z = ball.z - axis.z / 4;
+                    }else{
+                        ball.z = ball.z - 20 / 4;
+                    }
                 }
             }
 
