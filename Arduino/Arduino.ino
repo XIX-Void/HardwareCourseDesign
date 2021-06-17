@@ -130,10 +130,12 @@ void dmpDataReady() {
 
 Stack myStack = Stack();
 
-
+boolean button_1,button_2,button_x1,button_x2 = false;
+boolean universe_reset = true;
 int maze[rows][cols];
 int game_time;
 int x_num=XNUM,y_num=YNUM;
+int x = 0;
 
 void initialize(){
     for(int i = 0; i < rows; i++){
@@ -161,7 +163,7 @@ void FindBlock() {
 		myStack.push_back(block(x_num,y_num-1,left));
 	}
 }
-
+void(* resetFunc) (void) = 0;
 
 
 void setup() {
@@ -172,7 +174,8 @@ void setup() {
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
     #endif
-
+/*
+//maze generation
     initialize();
     srand(analogRead(9) * analogRead(10));
     //srand((unsigned)time(NULL));
@@ -210,7 +213,8 @@ void setup() {
         }
         myStack.erase(myStack.begin() + randnum);
     }
-    
+//maze generation
+*/
 
     Serial.begin(115200);
     //while (!Serial); // wait for Leonardo enumeration, others continue immediately
@@ -223,9 +227,6 @@ void setup() {
     // verify connection
     Serial.println(F("Testing device connections..."));
     Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
-
-    // wait for ready
-    Serial.println(F("\nS_end any character to begin DMP programming and demo: "));
 
     // load and configure the DMP
     Serial.println(F("Initializing DMP..."));
@@ -270,13 +271,6 @@ void setup() {
         Serial.println(F(")"));
     }
 
-    // configure LED for output
-    pinMode(LED_PIN, OUTPUT);
-
-
-
-
-
 
     u8g2.setBusClock(800000);
     u8g2.begin();
@@ -287,31 +281,64 @@ void setup() {
 
 
 void loop() {
+    // first thing is generating maze
+    //maze generation
+    if(universe_reset){
+        initialize();
+        srand(analogRead(9) * analogRead(10));
+        //srand((unsigned)time(NULL));
+        FindBlock();
+        
+        while(myStack.size()){
+            int blockSize = myStack.size();
+            int randnum = rand() % blockSize;
+            block selectBlock = myStack.getBlock(randnum);
+            x_num = selectBlock.row;
+            y_num = selectBlock.column;
+            switch (selectBlock.direction){
+            case down:{
+                x_num++;
+                break;
+                }
+            case right:{
+                y_num++;
+                break;
+                }
+            case left:{
+                y_num--;
+                break;
+                }
+            case up:{
+                x_num--;
+                break;
+                }
+            }
+            if(maze[x_num][y_num] == walls){
+                maze[selectBlock.row][selectBlock.column] = maze[x_num][y_num] = nothing;
+                FindBlock();
+            }else{
 
-    
+            }
+            myStack.erase(myStack.begin() + randnum);
+        }
+        universe_reset = false; //universe generate completed,set false
+    }
+//maze generation
+
 
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
     // read a packet from FIFO
     if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) { // Get the Latest packet 
-        
-        #ifdef OUTPUT_READABLE_YAWPITCHROLL
-            // display Euler angles in degrees
+            x      = ypr[0] * 180/M_PI;
             axis.y = ypr[1] * 180/M_PI;
             axis.z = ypr[2] * 180/M_PI;
 
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            // Serial.print("ypr\t");
-            // Serial.print(y);
-            // Serial.print("\t");
-            // Serial.println(z);
-        #endif
-
-        // blink LED to indicate activity
-        //blinkState = !blinkState;
-        //digitalWrite(LED_PIN, blinkState);
+            Serial.print("ypr\t");
+            Serial.println(x);
 
         u8g2.clearBuffer();                   // clear the internal memory
         //u8g2.setFont(u8g2_font_ncenB08_tr);   // choose a suitable font
@@ -325,11 +352,35 @@ void loop() {
             u8g2.print(game_time);
             u8g2.drawStr(0,52,"      Second!");
             u8g2.sendBuffer();
-        }else{
+            if(axis.z >= 45){
+                button_1 = true;
+                Serial.println(F("button1"));
+            }
+            if(axis.z <= -45){
+                button_2 = true;
+                Serial.println(F("button2"));
+            }
+            if(button_1 && button_2){
+                Serial.println(F("ok"));
+                //resetFunc();
+                ball.y = ball.z = 6.0;
+                universe_reset = true;
+                button_1 = false;
+                button_2 = false;
+                u8g2.clearBuffer();
+                u8g2.drawStr(10,28,"Wait 3s!");
+                u8g2.sendBuffer();
+                delay(3000);
+            }
+        }else if(!button_x1 || !button_x2){
+            //x reset maze
+            if(x >  60){button_x1 = true;}
+            if(x < -60){button_x2 = true;}
+
             //ball moving
             if(axis.y < -0.8){ //go left
                 if(maze[(int)ball.y/4 - 1][(int)ball.z/4] == walls){
-                    Serial.println("judgement 1 --- ");
+                    //Serial.println("judgement 1 --- ");
                 }else{
                     if(-20 <= axis.y){
                         ball.y = ball.y + axis.y / 4;
@@ -339,7 +390,7 @@ void loop() {
                 }
             }else if(axis.y > 0.8){ //go right
                 if(maze[(int)ball.y/4 + 1][(int)ball.z/4] == walls){
-                    Serial.println("judgement 2 --- ");
+                    //Serial.println("judgement 2 --- ");
                 }else{
                     if(20 >= axis.y){
                         ball.y = ball.y + axis.y / 4;
@@ -350,7 +401,7 @@ void loop() {
             }
             if(axis.z < -0.8){ //go down
                 if(maze[(int)ball.y/4][(int)ball.z/4 + 1] == walls){
-                    Serial.println("judgement 3 --- ");
+                    //Serial.println("judgement 3 --- ");
                 }else{
                     if(-20 <= axis.z){
                         ball.z = ball.z - axis.z / 4;
@@ -360,7 +411,7 @@ void loop() {
                 }
             }else if(axis.z > 0.8){ //go up
                 if(maze[(int)ball.y/4][(int)ball.z/4 - 1] == walls){
-                    Serial.println("judgement 4 --- ");
+                    //Serial.println("judgement 4 --- ");
                 }else{
                     if(20 >= axis.z){
                         ball.z = ball.z - axis.z / 4;
@@ -398,6 +449,17 @@ void loop() {
             u8g2.drawCircle(4 * (rows - 2) + 2 , 4 * (cols - 2) + 2, 2 , U8G2_DRAW_ALL);//end point
             u8g2.sendBuffer();                    // transfer internal memory to the display
             game_time = millis() / 1000;
+        }else{
+            Serial.println(F("ok x"));
+            ball.y = ball.z = 6.0;
+            button_x1 = false;
+            button_x2 = false;
+            u8g2.clearBuffer();
+            u8g2.setFont(u8g2_font_ncenB14_tr);
+            u8g2.drawStr(10,32,"Generating!");
+            u8g2.sendBuffer();
+            universe_reset = true;
+            delay(1000);
         }
     }
 }
