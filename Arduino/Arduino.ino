@@ -188,47 +188,7 @@ void setup() {
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
     #endif
-/*
-//maze generation
-    initialize();
-    srand(analogRead(9) * analogRead(10));
-    //srand((unsigned)time(NULL));
-    FindBlock();
-    
-    while(myStack.size()){
-        int blockSize = myStack.size();
-        int randnum = rand() % blockSize;
-        block selectBlock = myStack.getBlock(randnum);
-        x_num = selectBlock.row;
-        y_num = selectBlock.column;
-        switch (selectBlock.direction){
-        case down:{
-            x_num++;
-            break;
-            }
-        case right:{
-            y_num++;
-            break;
-            }
-        case left:{
-            y_num--;
-            break;
-            }
-        case up:{
-            x_num--;
-            break;
-            }
-        }
-        if(maze[x_num][y_num] == walls){
-            maze[selectBlock.row][selectBlock.column] = maze[x_num][y_num] = nothing;
-            FindBlock();
-        }else{
 
-        }
-        myStack.erase(myStack.begin() + randnum);
-    }
-//maze generation
-*/
 
     Serial.begin(115200);
     //while (!Serial); // wait for Leonardo enumeration, others continue immediately
