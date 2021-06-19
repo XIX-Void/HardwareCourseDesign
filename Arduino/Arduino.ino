@@ -446,7 +446,7 @@ void loop() {
             Serial.println((int)ball.z/4);
             */
 
-            u8g2.drawBox(ball.y,ball.z, 6 ,6);
+            u8g2.drawDisc(ball.y - 1 ,ball.z - 1, 3);
 
 
 
