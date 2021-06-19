@@ -163,8 +163,22 @@ void FindBlock() {
 		myStack.push_back(block(x_num,y_num-1,left));
 	}
 }
-void(* resetFunc) (void) = 0;
+//void(* resetFunc) (void) = 0;
+/*
+boolean maze_gap_checkY(coordinate &ball, coordinate &axis){
+    if(axis.y >= 0){ //向右走
+        for(int i = 0; i < axis.y / 4; i++){
+            if(maze[(int)ball.y/4 + i][(int)ball.z/4] == walls){
+                return false;
+            }
+        }
+    }else{
+        for(int j = 0; j < axis.y / 4; j++){
 
+        }
+    }
+}
+*/
 
 void setup() {
     // join I2C bus (I2Cdev library doesn't do this automatically)
@@ -381,21 +395,21 @@ void loop() {
             if(axis.y < -0.8){ //go left
                 if(maze[(int)ball.y/4 - 1][(int)ball.z/4] == walls){
                     //Serial.println("judgement 1 --- ");
-                }else{
-                    if(-20 <= axis.y){
+                }else{ //如果当前小球坐标加上陀螺仪坐标的坐标映射在矩阵中距离之前的位置间隔了一堵墙，那么不能走
+                    if(-16 <= axis.y){
                         ball.y = ball.y + axis.y / 4;
                     }else{
-                        ball.y = ball.y + -20 / 4;
+                        ball.y = ball.y + -15 / 4;
                     }
                 }
             }else if(axis.y > 0.8){ //go right
                 if(maze[(int)ball.y/4 + 1][(int)ball.z/4] == walls){
                     //Serial.println("judgement 2 --- ");
                 }else{
-                    if(20 >= axis.y){
+                    if(16 >= axis.y){
                         ball.y = ball.y + axis.y / 4;
                     }else{
-                        ball.y = ball.y + 20 / 4;
+                        ball.y = ball.y + 16 / 4;
                     }
                 }
             }
@@ -403,20 +417,20 @@ void loop() {
                 if(maze[(int)ball.y/4][(int)ball.z/4 + 1] == walls){
                     //Serial.println("judgement 3 --- ");
                 }else{
-                    if(-20 <= axis.z){
+                    if(-16 <= axis.z){
                         ball.z = ball.z - axis.z / 4;
                     }else{
-                        ball.z = ball.z - -20 / 4;
+                        ball.z = ball.z - -16 / 4;
                     }
                 }
             }else if(axis.z > 0.8){ //go up
                 if(maze[(int)ball.y/4][(int)ball.z/4 - 1] == walls){
                     //Serial.println("judgement 4 --- ");
                 }else{
-                    if(20 >= axis.z){
+                    if(16 >= axis.z){
                         ball.z = ball.z - axis.z / 4;
                     }else{
-                        ball.z = ball.z - 20 / 4;
+                        ball.z = ball.z - 16 / 4;
                     }
                 }
             }
@@ -432,7 +446,7 @@ void loop() {
             Serial.println((int)ball.z/4);
             */
 
-            u8g2.drawBox(ball.y,ball.z, 3 ,3);
+            u8g2.drawBox(ball.y,ball.z, 6 ,6);
 
 
 
