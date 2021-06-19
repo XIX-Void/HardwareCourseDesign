@@ -395,6 +395,11 @@ void loop() {
             if(axis.y < -0.8){ //go left
                 if(maze[(int)ball.y/4 - 1][(int)ball.z/4] == walls){
                     //Serial.println("judgement 1 --- ");
+                    if((int)ball.y % 4 < 2){
+                        ball.y = ball.y + 1;
+                    }else if((int)ball.y % 4 == 3){
+                        ball.y = ball.y - 1;
+                    }
                 }else{ //如果当前小球坐标加上陀螺仪坐标的坐标映射在矩阵中距离之前的位置间隔了一堵墙，那么不能走
                     if(-16 <= axis.y){
                         ball.y = ball.y + axis.y / 4;
@@ -405,6 +410,11 @@ void loop() {
             }else if(axis.y > 0.8){ //go right
                 if(maze[(int)ball.y/4 + 1][(int)ball.z/4] == walls){
                     //Serial.println("judgement 2 --- ");
+                    if((int)ball.y % 4 > 2){
+                        ball.y = ball.y - 1;
+                    }else if((int)ball.y % 4 <= 1){
+                        ball.y = ball.y + 1;
+                    }
                 }else{
                     if(16 >= axis.y){
                         ball.y = ball.y + axis.y / 4;
@@ -416,6 +426,11 @@ void loop() {
             if(axis.z < -0.8){ //go down
                 if(maze[(int)ball.y/4][(int)ball.z/4 + 1] == walls){
                     //Serial.println("judgement 3 --- ");
+                    if((int)ball.z % 4 > 2){
+                        ball.z = ball.z - 1;
+                    }else if((int)ball.z % 4 <= 1){
+                        ball.z = ball.z + 1;
+                    }
                 }else{
                     if(-16 <= axis.z){
                         ball.z = ball.z - axis.z / 4;
@@ -426,6 +441,11 @@ void loop() {
             }else if(axis.z > 0.8){ //go up
                 if(maze[(int)ball.y/4][(int)ball.z/4 - 1] == walls){
                     //Serial.println("judgement 4 --- ");
+                    if((int)ball.z % 4 < 2){
+                        ball.z = ball.z + 1;
+                    }else if((int)ball.z % 4 == 3){
+                        ball.z = ball.z - 1;
+                    }
                 }else{
                     if(16 >= axis.z){
                         ball.z = ball.z - axis.z / 4;
@@ -446,7 +466,7 @@ void loop() {
             Serial.println((int)ball.z/4);
             */
 
-            u8g2.drawDisc(ball.y - 1 ,ball.z - 1, 3);
+            u8g2.drawBox(ball.y - 2  ,ball.z - 2 , 4, 4);
 
 
 
