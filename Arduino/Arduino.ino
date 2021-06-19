@@ -164,21 +164,7 @@ void FindBlock() {
 	}
 }
 //void(* resetFunc) (void) = 0;
-/*
-boolean maze_gap_checkY(coordinate &ball, coordinate &axis){
-    if(axis.y >= 0){ //向右走
-        for(int i = 0; i < axis.y / 4; i++){
-            if(maze[(int)ball.y/4 + i][(int)ball.z/4] == walls){
-                return false;
-            }
-        }
-    }else{
-        for(int j = 0; j < axis.y / 4; j++){
 
-        }
-    }
-}
-*/
 
 void setup() {
     // join I2C bus (I2Cdev library doesn't do this automatically)
